@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="비숑">
+<meta name="theme-color" content="#ffe3ea">
+<meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<title>비숑 메모</title>
+<style>
+  :root{
+    --ink:#3b2a2a; --soft:#7a6262; --pink:#ff8fa8; --pink2:#ffd3dd; --cream:#fff8f1; --line:#3b2a2a;
+    --pix:'Galmuri11','Galmuri9',system-ui,sans-serif;
+    --sat: env(safe-area-inset-top,0px); --sab: env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;background:#ffe3ea;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',system-ui,sans-serif}
+  body{display:flex;flex-direction:column;height:100dvh}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+
+  /* top */
+  .top{padding:calc(var(--sat) + 10px) 14px 8px;display:flex;align-items:center;gap:8px;z-index:5}
+  .name{font-family:var(--pix);font-size:20px;letter-spacing:.5px}
+  .pill{font-family:var(--pix);font-size:12px;background:#fff;border:2px solid var(--line);padding:4px 8px;box-shadow:2px 2px 0 var(--line);white-space:nowrap}
+  .pill.wait{background:#fff3c4}
+  .pill.ok{background:#d9f5e3}
+  .spacer{flex:1}
+  .iconbtn{font-family:var(--pix);font-size:13px;background:#fff;border:2px solid var(--line);padding:6px 10px;box-shadow:2px 2px 0 var(--line)}
+  .iconbtn:active{transform:translate(2px,2px);box-shadow:none}
+
+  /* scene */
+  .scene{position:relative;flex:1;overflow:hidden;
+    background:
+      linear-gradient(#ffe3ea 0%, #fff0f3 40%, transparent 40%),
+      repeating-linear-gradient(90deg,#c9ecc9 0 16px,#bfe6bf 16px 32px);
+  }
+  .sky-cloud{position:absolute;height:14px;background:#fff;box-shadow:0 -8px 0 -2px #fff, 12px -8px 0 -2px #fff;opacity:.9;animation:drift linear infinite}
+  @keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(520px)}}
+  .floorline{position:absolute;left:0;right:0;top:40%;height:4px;background:#9fd29f}
+  .sun{position:absolute;left:22px;top:22px;width:28px;height:28px;background:#ffe27a;box-shadow:0 0 0 4px #fff3b8;}
+  .flower{position:absolute;width:6px;height:6px;background:#ff9fb6;box-shadow:6px 0 0 #fff2a8,-6px 0 0 #fff2a8,0 6px 0 #fff2a8,0 -6px 0 #fff2a8}
+
+  .laptop{position:absolute;right:14px;width:74px;text-align:center;font-family:var(--pix);font-size:11px;color:var(--soft)}
+  .laptop .scr{width:64px;height:42px;margin:0 auto;background:#e8f1ff;border:3px solid var(--line);position:relative}
+  .laptop .scr::after{content:"";position:absolute;inset:6px 8px auto 8px;height:4px;background:#bcd3f5;box-shadow:0 8px 0 #bcd3f5,0 16px 0 #d7e4f8}
+  .laptop .base{width:76px;height:7px;margin:0 auto 4px;background:#bfb2b2;border:3px solid var(--line);border-top:0}
+  .laptop.ping .scr{background:#fff3c4}
+
+  .pet{position:absolute;left:0;width:118px;height:118px;will-change:transform;z-index:3;touch-action:manipulation}
+  .pet img{position:absolute;bottom:0;left:50%;transform:translateX(-50%);max-width:118px;max-height:118px;pointer-events:none;user-select:none;-webkit-user-drag:none}
+  .pet.flip img{transform:translateX(-50%) scaleX(-1)}
+  .pet.walking img{animation:bob .32s steps(2) infinite}
+  .pet.flip.walking img{animation:bobf .32s steps(2) infinite}
+  @keyframes bob{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(-6px)}}
+  @keyframes bobf{0%{transform:translateX(-50%) scaleX(-1) translateY(0)}100%{transform:translateX(-50%) scaleX(-1) translateY(-6px)}}
+  .pet.jump img{animation:jump .5s ease-out 2}
+  @keyframes jump{0%,100%{transform:translateX(-50%) translateY(0)}45%{transform:translateX(-50%) translateY(-26px)}}
+  .pet.breathe img{animation:breathe 2.4s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:translateX(-50%) scaleY(1)}50%{transform:translateX(-50%) scaleY(.97)}}
+  .shadow{position:absolute;bottom:-4px;left:50%;width:70px;height:10px;margin-left:-35px;background:rgba(80,120,80,.25);border-radius:50%}
+
+  .bubble{position:absolute;z-index:4;max-width:230px;min-width:60px;background:#fff;border:3px solid var(--line);box-shadow:3px 3px 0 var(--line);
+    padding:8px 10px;font-family:var(--pix);font-size:14px;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;pointer-events:none}
+  .bubble.show{opacity:1;transform:none}
+  .bubble::after{content:"";position:absolute;left:var(--tail,40px);bottom:-11px;width:12px;height:12px;background:#fff;border-right:3px solid var(--line);border-bottom:3px solid var(--line);transform:rotate(45deg)}
+
+  /* reply toast */
+  .toast{position:absolute;left:12px;right:12px;top:10px;z-index:6;background:#fff;border:3px solid var(--line);box-shadow:4px 4px 0 var(--line);padding:10px 12px;display:none}
+  .toast.show{display:block;animation:pop .25s ease-out}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
+  .toast h4{margin:0 0 4px;font-family:var(--pix);font-size:13px;color:var(--pink)}
+  .toast p{margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap}
+  .toast small{display:block;margin-top:6px;color:var(--soft);font-size:12px}
+
+  /* composer */
+  .composer{background:var(--cream);border-top:3px solid var(--line);padding:10px 12px calc(var(--sab) + 10px);z-index:5}
+  .row{display:flex;gap:8px;align-items:flex-end}
+  textarea{flex:1;resize:none;font:16px/1.45 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;color:var(--ink);background:#fff;border:2px solid var(--line);padding:9px 10px;max-height:112px;min-height:42px;outline:none;border-radius:0;overflow:hidden}
+  textarea:focus{box-shadow:3px 3px 0 var(--pink)}
+  .send{font-family:var(--pix);font-size:15px;background:var(--pink);color:#fff;border:2px solid var(--line);box-shadow:3px 3px 0 var(--line);padding:0 14px;height:42px;text-shadow:1px 1px 0 #c25b74}
+  .send:disabled{background:#d9c3c8;text-shadow:none}
+  .send:not(:disabled):active{transform:translate(3px,3px);box-shadow:none}
+  .opts{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .chip{font-family:var(--pix);font-size:13px;background:#fff;border:2px solid var(--line);padding:5px 10px}
+  .chip[aria-pressed="true"]{background:#ffdf6b}
+  .hint{font-size:12px;color:var(--soft)}
+
+  /* sheet */
+  .sheet-bg{position:fixed;inset:0;background:rgba(59,42,42,.35);z-index:20;display:none}
+  .sheet-bg.show{display:block}
+  .sheet{position:fixed;left:0;right:0;bottom:0;max-height:82dvh;background:var(--cream);border-top:3px solid var(--line);z-index:21;transform:translateY(105%);transition:transform .25s ease-out;display:flex;flex-direction:column;padding-bottom:var(--sab)}
+  .sheet.show{transform:none}
+  .sheet header{display:flex;align-items:center;padding:12px 14px;border-bottom:2px dashed #d8c4c4}
+  .sheet header b{font-family:var(--pix);font-size:16px;flex:1}
+  .list{overflow:auto;padding:10px 12px 16px;-webkit-overflow-scrolling:touch}
+  .item{background:#fff;border:2px solid var(--line);padding:10px 12px;margin-bottom:10px}
+  .meta{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--soft);margin-bottom:4px;flex-wrap:wrap}
+  .tag{font-family:var(--pix);font-size:11px;padding:2px 6px;border:2px solid var(--line)}
+  .tag.new{background:#fff3c4}.tag.done{background:#d9f5e3}.tag.urgent{background:#ffb3c4}.tag.local{background:#e5e5e5}
+  .item .t{font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+  .item .r{margin-top:8px;background:#f3fbf5;border-left:4px solid #7cc79a;padding:6px 8px;font-size:14px;line-height:1.5;white-space:pre-wrap}
+  .item .cancel{margin-top:6px;font-size:12px;color:#b4536b;text-decoration:underline}
+  .empty{text-align:center;color:var(--soft);padding:30px 0;font-family:var(--pix);font-size:13px}
+
+  /* setup + a2hs */
+  .setup{position:fixed;inset:0;background:#ffe3ea;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+  .setup.show{display:flex}
+  .setup img{width:150px}
+  .setup h2{font-family:var(--pix);font-size:20px;margin:10px 0 6px}
+  .setup p{margin:0 0 14px;line-height:1.6;color:var(--soft);font-size:14px}
+  .setup input{width:100%;max-width:320px;font-size:16px;padding:10px;border:2px solid var(--line);margin-bottom:10px;border-radius:0}
+  .a2hs{position:absolute;left:12px;right:12px;bottom:10px;z-index:6;background:#fff;border:2px solid var(--line);box-shadow:3px 3px 0 var(--line);padding:9px 34px 9px 12px;font-size:13px;line-height:1.5;display:none}
+  .a2hs.show{display:block}
+  .a2hs button{position:absolute;right:6px;top:4px;font-size:18px;padding:2px 6px}
+</style>
+</head>
+<body>
+  <div class="top">
+    <span class="name" id="petName">비숑</span>
+    <span class="pill" id="pill">불러오는 중</span>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="openLog">보낸 메모</button>
+  </div>
+
+  <main class="scene" id="scene">
+    <div class="sky-cloud" style="top:8%;width:46px;animation-duration:38s"></div>
+    <div class="sky-cloud" style="top:20%;width:30px;animation-duration:55s;animation-delay:-20s"></div>
+    <div class="floorline"></div>
+    <div class="flower" style="left:12%;top:70%"></div>
+    <div class="flower" style="left:46%;top:86%"></div>
+    <div class="flower" style="left:78%;top:64%"></div>
+    <div class="flower" style="left:30%;top:55%"></div>
+    <div class="sun"></div>
+    <div class="laptop" id="laptop"><div class="scr"></div><div class="base"></div>노트북</div>
+
+    <div class="pet breathe" id="pet" role="button" aria-label="비숑 쓰다듬기"><div class="shadow"></div><img id="petImg" src="img/sit.png" alt="비숑"></div>
+    <div class="bubble" id="bubble"></div>
+
+    <div class="toast" id="toast" role="status"><h4>노트북이 답장했어요</h4><p id="toastText"></p><small id="toastMeta"></small></div>
+    <div class="a2hs" id="a2hs">아래 <b>공유 버튼</b> 누르고 <b>홈 화면에 추가</b>하면 앱처럼 열 수 있어요.<button id="a2hsClose" aria-label="닫기">×</button></div>
+  </main>
+
+  <div class="composer">
+    <div class="opts">
+      <button class="chip" id="urgent" aria-pressed="false">급해요</button>
+      <span class="hint" id="hint">보통은 30분 안에 노트북이 확인해요</span>
+    </div>
+    <div class="row">
+      <textarea id="msg" rows="1" placeholder="비숑한테 말하기 (아이디어, 할 일...)" enterkeyhint="send"></textarea>
+      <button class="send" id="send" disabled>보내기</button>
+    </div>
+  </div>
+
+  <div class="sheet-bg" id="sheetBg"></div>
+  <section class="sheet" id="sheet" aria-label="보낸 메모">
+    <header><b>보낸 메모</b><button class="iconbtn" id="closeLog">닫기</button></header>
+    <div class="list" id="list"></div>
+  </section>
+
+  <div class="setup" id="setup">
+    <img src="img/listen.png" alt="">
+    <h2>연결 코드가 필요해요</h2>
+    <p>노트북에서 받은 연결 링크로 열면 자동으로 연결돼요.<br>코드만 있으면 아래에 붙여 넣어 주세요.</p>
+    <input id="keyInput" placeholder="연결 코드" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="send" id="keySave">연결하기</button>
+  </div>
+
+<script>
+const SB_URL = 'https://vgkveugpjlgmlrenciuv.supabase.co';
+const SB_KEY = 'sb_publishable_TrsHyW1oCPCaCR-2j4obpA_A1zc-i2L';
+const $ = (id) => document.getElementById(id);
+const store = { get:(k,d)=>{try{const v=localStorage.getItem('bichon.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}, set:(k,v)=>{try{localStorage.setItem('bichon.'+k,JSON.stringify(v))}catch(e){}} };
+
+// ---------- key ----------
+let KEY = new URLSearchParams(location.search).get('k') || (location.hash.match(/k=([\w-]+)/)||[])[1] || store.get('key', '');
+if (KEY) store.set('key', KEY);
+
+async function rpc(fn, body){
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method:'POST', headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json' }, body: JSON.stringify({ p_key: KEY, ...body }) });
+  const t = await r.text();
+  if (!r.ok) { const e = new Error(t); e.status = r.status; e.badKey = /bad key/.test(t); throw e; }
+  return t ? JSON.parse(t) : null;
+}
+
+// ---------- pet ----------
+const pet = $('pet'), petImg = $('petImg'), bubble = $('bubble'), scene = $('scene'), laptop = $('laptop');
+const IMG = { sit:'img/sit.png', walk:'img/walk.png', happy:'img/happy.png', sleep:'img/sleep.png', listen:'img/listen.png', memo:'img/memo.png' };
+Object.values(IMG).forEach(s => { const i = new Image(); i.src = s; });
+const P = { x: 40, y: 0, tx: null, speed: 70, state: 'sit', face: 1, busy: false, lastTouch: Date.now() };
+const LINES = {
+  idle: ['뭐 생각났어? 말해줘', '멍! 할 일 생기면 나한테 줘', '노트북까지 내가 물어다 줄게', '아이디어 있으면 바로 말해', '오늘도 수고했어', '심심해... 뭐 시킬 거 없어?'],
+  pat: ['헤헤 간지러워', '멍멍!', '쓰다듬어줘서 좋아', '꼬리 흔드는 중', '나 오늘 털 뽀송하지?'],
+  wake: ['으응... 깼어', '하암... 무슨 일이야?', '자고 있었는데... 말해봐'],
+  listen: ['응응, 듣고 있어', '천천히 말해도 돼', '귀 쫑긋!'],
+  sent: ['노트북한테 갖다 놨어! 30분 안에 확인할 거야', '잘 물어다 놨어! 곧 처리될 거야', '배달 완료! 노트북이 확인하면 알려줄게'],
+  urgent: ['급한 거지? 노트북에 바로 알림 띄웠어!', '전속력으로 갖다 놨어! 노트북에 알림 갔어'],
+  offline: ['앗, 인터넷이 안 돼서 내가 갖고 있을게. 연결되면 다시 갖다 줄게'],
+  replied: ['노트북이 답장했어! 위에 봐봐']
+};
+const pick = (a) => a[Math.floor(Math.random()*a.length)];
+function bounds(){ const w = scene.clientWidth, h = scene.clientHeight; const floorTop = h*0.40; return { minX: 6, maxX: w - 118 - 6, floorTop, h, w }; }
+function placeLaptop(){ const b = bounds(); laptop.style.top = (b.floorTop - 30) + 'px'; }
+function setState(s){
+  P.state = s;
+  petImg.src = IMG[s === 'carry' ? 'memo' : s === 'walk' ? 'walk' : s] || IMG.sit;
+  pet.classList.toggle('walking', s === 'walk' || s === 'carry');
+  pet.classList.toggle('breathe', s === 'sit' || s === 'sleep' || s === 'listen');
+  if (s === 'carry') petImg.src = IMG.memo;
+}
+let bubbleTimer = null;
+function say(text, ms = 3200){
+  bubble.textContent = text; bubble.classList.add('show'); positionBubble();
+  clearTimeout(bubbleTimer); if (ms) bubbleTimer = setTimeout(() => bubble.classList.remove('show'), ms);
+}
+function positionBubble(){
+  const b = bounds(); const bw = bubble.offsetWidth || 160, bh = bubble.offsetHeight || 40;
+  let left = P.x + 59 - 40; left = Math.max(8, Math.min(left, b.w - bw - 8));
+  bubble.style.left = left + 'px'; bubble.style.top = (P.yTop - bh - 14) + 'px';
+  bubble.style.setProperty('--tail', Math.max(14, Math.min(bw - 26, P.x + 59 - left - 6)) + 'px');
+}
+function render(){
+  const b = bounds();
+  if (!b.h) return;
+  if (!P.inited){ P.inited = true; P.x = b.w*0.3; P.y = b.floorTop + 10; }
+  laptop.style.top = (b.floorTop - 30) + 'px'; P.yTop = Math.min(b.h - 130, Math.max(b.floorTop - 40, P.y)); 
+  pet.style.transform = `translate(${P.x}px, ${P.yTop}px)`;
+  pet.style.zIndex = 3; pet.classList.toggle('flip', P.face < 0);
+  if (bubble.classList.contains('show')) positionBubble();
+}
+function walkTo(x, y, state='walk', speed=70){
+  return new Promise(res => { P.tx = x; P.ty = y; P.speed = speed; P.onArrive = res; setState(state); P.face = x >= P.x ? 1 : -1; });
+}
+let lastT = performance.now();
+function tick(t){
+  const dt = Math.min(0.05, (t - lastT)/1000); lastT = t;
+  if (P.tx !== null){
+    const dx = P.tx - P.x, dy = (P.ty ?? P.y) - P.y, d = Math.hypot(dx, dy), step = P.speed*dt;
+    if (d <= step){ P.x = P.tx; P.y = P.ty ?? P.y; P.tx = null; const f = P.onArrive; P.onArrive = null; f && f(); }
+    else { P.x += dx/d*step; P.y += dy/d*step; P.face = dx >= 0 ? 1 : -1; }
+  }
+  render(); requestAnimationFrame(tick);
+}
+function isNight(){ const h = new Date().getHours(); return h >= 1 && h < 7; }
+async function wander(){
+  if (P.busy || document.hidden) return;
+  if (document.activeElement === $('msg')) return;
+  const idleFor = Date.now() - P.lastTouch;
+  if (isNight() || idleFor > 150000){ if (P.state !== 'sleep'){ setState('sleep'); say('쿨쿨...', 2500); } return; }
+  if (P.state === 'sleep') return;
+  const b = bounds(); const r = Math.random();
+  if (r < 0.55){
+    const x = b.minX + Math.random()*(b.maxX - b.minX - 70);
+    const y = b.floorTop - 40 + Math.random()*Math.max(10, (b.h - 130) - (b.floorTop - 40));
+    await walkTo(x, y); if (!P.busy) setState('sit');
+  } else if (r < 0.7){ say(pick(LINES.idle)); }
+}
+function touch(){ P.lastTouch = Date.now(); }
+
+pet.addEventListener('click', () => {
+  touch(); if (P.busy) return;
+  if (P.state === 'sleep'){ setState('sit'); say(pick(LINES.wake)); return; }
+  P.tx = null; setState('happy'); pet.classList.remove('jump'); void pet.offsetWidth; pet.classList.add('jump');
+  say(pick(LINES.pat), 2200);
+  setTimeout(() => { pet.classList.remove('jump'); if (!P.busy) setState('sit'); }, 1300);
+});
+
+// ---------- composer ----------
+const msg = $('msg'), sendBtn = $('send'), urgentBtn = $('urgent');
+function autosize(){ msg.style.height = 'auto'; msg.style.height = Math.min(112, msg.scrollHeight) + 'px'; msg.style.overflowY = msg.scrollHeight > 112 ? 'auto' : 'hidden'; }
+msg.addEventListener('input', () => { autosize(); sendBtn.disabled = !msg.value.trim(); touch(); });
+msg.addEventListener('focus', () => { touch(); if (P.busy) return; P.tx = null; setState('listen'); say(pick(LINES.listen), 2400); });
+msg.addEventListener('blur', () => { if (!P.busy && P.state === 'listen') setTimeout(() => { if (!P.busy && P.state==='listen') setState('sit'); }, 400); });
+msg.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && window.matchMedia('(pointer:fine)').matches){ e.preventDefault(); doSend(); } });
+urgentBtn.addEventListener('click', () => {
+  const on = urgentBtn.getAttribute('aria-pressed') !== 'true';
+  urgentBtn.setAttribute('aria-pressed', on);
+  $('hint').textContent = on ? '보내면 노트북에 바로 알림이 떠요' : '보통은 30분 안에 노트북이 확인해요';
+});
+sendBtn.addEventListener('click', doSend);
+
+async function doSend(){
+  const text = msg.value.trim(); if (!text || P.busy) return;
+  const urgent = urgentBtn.getAttribute('aria-pressed') === 'true';
+  P.busy = true; sendBtn.disabled = true; msg.value = ''; autosize(); msg.blur(); touch();
+  urgentBtn.setAttribute('aria-pressed', 'false'); $('hint').textContent = '보통은 30분 안에 노트북이 확인해요';
+  const b = bounds(); const lapX = b.w - 118 - 84, lapY = b.floorTop - 20;
+  say(urgent ? '급한 거! 뛰어갈게!' : '물었다! 갖다 줄게', 0);
+  const req = rpc('pet_send', { p_text: text, p_urgent: urgent }).then(() => true).catch((e) => { if (e.badKey) showSetup(); queuePush({ text, urgent, at: Date.now() }); return false; });
+  await walkTo(lapX, lapY, 'carry', urgent ? 190 : 120);
+  const ok = await req;
+  laptop.classList.add('ping'); setTimeout(() => laptop.classList.remove('ping'), 1500);
+  setState('happy'); pet.classList.remove('jump'); void pet.offsetWidth; pet.classList.add('jump');
+  say(ok ? pick(urgent ? LINES.urgent : LINES.sent) : LINES.offline[0], 4200);
+  setTimeout(() => { pet.classList.remove('jump'); setState('sit'); P.busy = false; }, 1400);
+  refresh();
+}
+
+// offline queue
+function queuePush(item){ const q = store.get('queue', []); q.push(item); store.set('queue', q); }
+async function flushQueue(){
+  const q = store.get('queue', []); if (!q.length || !KEY) return;
+  const left = [];
+  for (const it of q){ try { await rpc('pet_send', { p_text: it.text, p_urgent: it.urgent }); } catch(e){ left.push(it); } }
+  store.set('queue', left); if (left.length < q.length) refresh();
+}
+window.addEventListener('online', flushQueue);
+
+// ---------- status + replies ----------
+let memos = [];
+function ago(iso){ if (!iso) return ''; const s = (Date.now() - new Date(iso).getTime())/1000; if (s < 60) return '방금'; if (s < 3600) return Math.floor(s/60)+'분 전'; if (s < 86400) return Math.floor(s/3600)+'시간 전'; const d = new Date(iso); return (d.getMonth()+1)+'/'+d.getDate(); }
+function fmt(iso){ const d = new Date(iso); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+async function refresh(){
+  if (!KEY) return;
+  try {
+    memos = await rpc('pet_list', { p_limit: 60 });
+    const pending = memos.filter(m => m.status === 'new').length + store.get('queue', []).length;
+    const pill = $('pill');
+    pill.textContent = pending ? `노트북 확인 대기 ${pending}개` : '전부 전달 완료';
+    pill.className = 'pill ' + (pending ? 'wait' : 'ok');
+    const seen = store.get('seenReply', 0);
+    const fresh = memos.filter(m => m.status === 'done' && m.reply && m.id > seen).sort((a,b) => a.id - b.id);
+    if (fresh.length){
+      const last = fresh[fresh.length-1];
+      $('toastText').textContent = last.reply;
+      $('toastMeta').textContent = `"${last.text.slice(0,40)}${last.text.length>40?'…':''}"에 대한 답장` + (fresh.length > 1 ? ` 외 ${fresh.length-1}개` : '') + ' · 눌러서 닫기';
+      $('toast').classList.add('show');
+      store.set('seenReply', last.id);
+      if (!P.busy){ setState('happy'); say(LINES.replied[0], 3000); setTimeout(() => { if (!P.busy) setState('sit'); }, 1800); }
+    }
+    if ($('sheet').classList.contains('show')) renderList();
+  } catch(e){
+    if (e.badKey) showSetup(); else { $('pill').textContent = '연결 안 됨'; $('pill').className = 'pill'; }
+  }
+}
+$('toast').addEventListener('click', () => $('toast').classList.remove('show'));
+
+// ---------- log sheet ----------
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function renderList(){
+  const q = store.get('queue', []);
+  const rows = q.map(it => `<div class="item"><div class="meta"><span class="tag local">아직 휴대폰에 있음</span>${it.urgent?'<span class="tag urgent">급해요</span>':''}<span>${fmt(it.at)}</span></div><div class="t">${esc(it.text)}</div></div>`)
+    .concat(memos.map(m => `<div class="item"><div class="meta"><span class="tag ${m.status}">${m.status==='done'?'처리 완료':'노트북 확인 대기'}</span>${m.urgent?'<span class="tag urgent">급해요</span>':''}<span>${fmt(m.created_at)}</span></div><div class="t">${esc(m.text)}</div>${m.reply?`<div class="r">${esc(m.reply)}</div>`:''}${m.status==='new'?`<button class="cancel" data-id="${m.id}">보내기 취소</button>`:''}</div>`));
+  $('list').innerHTML = rows.length ? rows.join('') : '<div class="empty">아직 보낸 메모가 없어요</div>';
+}
+$('list').addEventListener('click', async (e) => {
+  const b = e.target.closest('.cancel'); if (!b) return;
+  if (!confirm('이 메모 보내기를 취소할까요?')) return;
+  b.disabled = true; try { await rpc('pet_cancel', { p_id: Number(b.dataset.id) }); } catch(err){} refresh().then(renderList);
+});
+function openLog(){ renderList(); $('sheet').classList.add('show'); $('sheetBg').classList.add('show'); refresh(); }
+function closeLog(){ $('sheet').classList.remove('show'); $('sheetBg').classList.remove('show'); }
+$('openLog').addEventListener('click', openLog); $('closeLog').addEventListener('click', closeLog); $('sheetBg').addEventListener('click', closeLog);
+
+// ---------- setup ----------
+function showSetup(){ $('setup').classList.add('show'); }
+$('keySave').addEventListener('click', async () => {
+  const v = $('keyInput').value.trim(); if (!v) return;
+  KEY = v; try { await rpc('pet_status', {}); store.set('key', v); $('setup').classList.remove('show'); refresh(); flushQueue(); }
+  catch(e){ $('keyInput').value = ''; $('keyInput').placeholder = '코드가 맞지 않아요. 다시 확인해 주세요'; }
+});
+
+// ---------- add to home hint ----------
+const standalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+if (/iPhone|iPad/.test(navigator.userAgent) && !standalone && !store.get('a2hsClosed', false)) $('a2hs').classList.add('show');
+$('a2hsClose').addEventListener('click', () => { $('a2hs').classList.remove('show'); store.set('a2hsClosed', true); });
+
+// ---------- boot ----------
+function boot(){
+  render(); requestAnimationFrame(tick);
+  if (!KEY) { showSetup(); return; }
+  if (isNight()) setState('sleep'); else { setState('sit'); setTimeout(() => say(pick(LINES.idle)), 600); }
+  refresh(); flushQueue();
+  setInterval(wander, 4200);
+  setInterval(() => { if (!document.hidden) refresh(); }, 45000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden){ touch(); refresh(); flushQueue(); } });
+}
+window.addEventListener('resize', () => { placeLaptop(); const b = bounds(); P.x = Math.min(P.x, b.maxX); render(); });
+boot();
+</script>
+</body>
+</html>
